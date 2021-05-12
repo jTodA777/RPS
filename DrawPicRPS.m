@@ -1,10 +1,12 @@
 color = {'k','r','g','b'}
 colormap_rgb = [0 0 0;1 0 0; 0 1 0; 0 0 1];
 colormap(colormap_rgb)
-FolderName = 'data64_1.5_1/'
-stepsize = 30
+FolderName = 'data64_1.26_1/'
+stepsize = 5
 
 while true
+    
+    pause(2)
     clf
     HowManyFiles = sum(cellfun(@(x) isfile(x),cellfun(@(x) [FolderName x],{dir(FolderName).name},'UniformOutput',false)));
     population = zeros(HowManyFiles,4);

@@ -1,9 +1,8 @@
 # RPS GAME 
-using DelimitedFiles, Random, StatsBase
+using DelimitedFiles, Random, StatsBase,Traceur,Printf
 # μ : 먹음, Predation
 # σ : 생성, Reproduction
 # ϵ : 자리바꿈, Exchange
-using Profile
 
 
 function InitMaker(L, PopulationRatio = [0.3, 0.3, 0.3])
@@ -97,13 +96,13 @@ function Generation(L, State, Nμ, Nσ, Nϵ, NumSpe, WeightsList, SpeciesList, I
     for i = 1:L^2
         # Loc = rand( IdxMatrix[State .== sample(SpeciesList, Weights(WeightsList))]) # 개체 수 무시 방법
         # println(State[IdxMatrix[1,1]])
-        
-        for j = SpeciesList
-            WeightsSpecies[State .=== j] .= WeightsList[j]
-            # for k = IdxMatrix[State .== j]
-            #     @inbounds WeightsSpecies[k[1],k[2]] = WeightsList[j]
-            # end
-        end
+        WeightsSpecies = sum([WeightsList[x] * (State .=== x) for x = SpeciesList])
+        # for j = SpeciesList
+        #     WeightsSpecies[State .=== j] .= WeightsList[j]
+        #     # for k = IdxMatrix[State .== j]
+        #     #     @inbounds WeightsSpecies[k[1],k[2]] = WeightsList[j]
+        #     # end
+        # end
         W = ProbabilityWeights(WeightsSpecies[:])
         Loc = sample(IdxMatrix[:], W) # 인구 수 고려
         
@@ -127,7 +126,7 @@ function MainRPS(FolderName, μ, σ, ϵ, L, PreIteration, TotalIteration, Popula
     NumSpe = length(PopulationRatio)
     IdxMatrix = [(x, y) for x = 1:L,y = 1:L]
     # count(State.==3)
-    
+    EndFlag = false
     SpeciesList = 1:NumSpe
     if ~isdir(FolderName)
         mkdir(FolderName)
@@ -161,13 +160,29 @@ function MainRPS(FolderName, μ, σ, ϵ, L, PreIteration, TotalIteration, Popula
             
             # println(" 작성 완료")
         end
-        println(WeightsList[1], " // ", i)
+        @printf("%.3f  //  %i \n", WeightsList[1], i)
+        EmptySpaceN = count(State .=== Int8(0))
+        for j = SpeciesList
+            if count(State .=== j) + EmptySpaceN === L^2
+                EndFlag = true
+                break
+            end
+        end
+        if EndFlag === true
+            break
+        end
+        
     end
 end
 
-Threads.@threads for i = 1:0.01:3
-    for j = 1:100
-        Random.seed!(j)
-        MainRPS("data64_" * string(i) * "_" * string(j), 1, 1, 3 * 10^-6, 64, 0, 10000, [0.3,0.3,0.3], [i,1,1])
+Threads.@threads for i = 1:0.1:3
+    for j = 1
+        FolderName = "data64_" * string(i) * "_" * string(j)
+        if ~isfile(FolderName * "/done")
+            Random.seed!(j)
+            MainRPS(FolderName, 1, 1, 3 * 10^-6, 64, 0, 10000, [0.3,0.3,0.3], [i,1,1])
+            io = open(FolderName * "/done", "w");
+            close(io);
+        end
     end
 end
