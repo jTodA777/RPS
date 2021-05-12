@@ -115,7 +115,7 @@ function MainRPS(μ, σ, ϵ, L, TotalIteration,PopulationRatio,WeightsList)
     for i = 1:TotalIteration
         
         State = Generation(L, State, Nμ, Nσ, Nϵ,NumSpe,WeightsList,SpeciesList,IdxMatrix)
-        writedlm("C:\\Users\\rlarb\\Desktop\\code\\RPS\\data\\" * string(i) * ".csv", State, ',', )
+        writedlm("data\\" * string(i) * ".csv", State, ',', )
         println(i)
     end
 end
