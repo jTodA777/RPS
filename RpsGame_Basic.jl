@@ -166,5 +166,8 @@ function MainRPS(FolderName, μ, σ, ϵ, L, PreIteration, TotalIteration, Popula
 end
 
 Threads.@threads for i = 1:0.01:3
-    MainRPS("data64_" * string(i), 1, 1, 3 * 10^-6, 64, 0, 10000, [0.3,0.3,0.3], [i,1,1])
+    for j = 1:100
+        Random.seed!(j)
+        MainRPS("data64_" * string(i) * "_" * string(j), 1, 1, 3 * 10^-6, 64, 0, 10000, [0.3,0.3,0.3], [i,1,1])
+    end
 end
