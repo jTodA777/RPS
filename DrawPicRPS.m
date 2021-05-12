@@ -1,4 +1,4 @@
-for i = 1 :3: inf
+for i = 1 :1: inf
     try
         A = readmatrix(['data/' num2str(i) '.csv']);
     catch

@@ -25,7 +25,7 @@ function Predation(State1, State2,NumSpe)
     if State1 != State2 && State1 != 0 && State2 != 0
         if (State1 == State2 + 1) || (State1 == 1 && State2 == NumSpe)
             State1 = 0
-        else
+        elseif State2 == State1 + 1
             State2 = 0
         end
     end
@@ -92,9 +92,19 @@ end
 function Generation(L, State, Nμ, Nσ, Nϵ,NumSpe,WeightsList,SpeciesList,IdxMatrix)
     Compass = rand(["N" "S" "W" "E"], L^2, 1)
     ActionProb = rand(L^2, 1)
+    WeightsSpecies = zeros(L,L)
     for i = 1:L^2
-        Loc = rand( IdxMatrix[State .== sample(SpeciesList, Weights(WeightsList))])
-        State = PairwiseInteraction(Loc[1], Loc[2], Compass[i], ActionProb[i], L, State, Nμ, Nσ, Nϵ,NumSpe)
+        # Loc = rand( IdxMatrix[State .== sample(SpeciesList, Weights(WeightsList))]) # 개체 수 무시 방법
+        # println(State[IdxMatrix[1,1]])
+        for j = SpeciesList
+            for k = IdxMatrix[State .== j]
+                
+                WeightsSpecies[k[1],k[2]] = WeightsList[j]
+            end
+        end
+        Loc = sample(IdxMatrix[:],Weights(WeightsSpecies[:])) # 인구 수 고려
+        
+        State = PairwiseInteraction(Loc[1], Loc[2], Compass[i], ActionProb[i], L, State, Nμ, Nσ, Nϵ,NumSpe) 
     end
     return State
 end
@@ -121,5 +131,5 @@ function MainRPS(μ, σ, ϵ, L, TotalIteration,PopulationRatio,WeightsList)
 end
 
 
-MainRPS(1, 1, 3 * 10^-6, 64, 5000,[0.3,0.3,0.3],[1,1,1])
+MainRPS(1, 1, 3 * 10^-6, 512, 5000,[0.3,0.3,0.3],[0.1,1,1])
 
