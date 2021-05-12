@@ -121,7 +121,13 @@ function MainRPS(μ, σ, ϵ, L, TotalIteration,PopulationRatio,WeightsList)
     #count(State.==3)
     
     SpeciesList = 1:NumSpe
-        # 
+    
+    if ~isdir("data")
+        mkdir("data")
+    else
+        rm("data", recursive=true)
+        mkdir("data")
+    end
     for i = 1:TotalIteration
         
         State = Generation(L, State, Nμ, Nσ, Nϵ,NumSpe,WeightsList,SpeciesList,IdxMatrix)
@@ -131,5 +137,5 @@ function MainRPS(μ, σ, ϵ, L, TotalIteration,PopulationRatio,WeightsList)
 end
 
 
-MainRPS(1, 1, 3 * 10^-6, 512, 5000,[0.3,0.3,0.3],[0.1,1,1])
+MainRPS(1, 1, 3 * 10^-6, 100, 5000,[0.3,0.3,0.3],[0.1,1,1])
 
