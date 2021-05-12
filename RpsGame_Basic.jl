@@ -1,5 +1,6 @@
 # RPS GAME 
 using DelimitedFiles, Random, StatsBase
+using CSV, DataFrames
 # μ : 먹음, Predation
 # σ : 생성, Reproduction
 # ϵ : 자리바꿈, Exchange
@@ -96,6 +97,9 @@ function Generation(L, State, Nμ, Nσ, Nϵ,NumSpe,WeightsList,SpeciesList,IdxMa
     for i = 1:L^2
         # Loc = rand( IdxMatrix[State .== sample(SpeciesList, Weights(WeightsList))]) # 개체 수 무시 방법
         # println(State[IdxMatrix[1,1]])
+        if i == mod(i,L)
+            print("|")
+        end
         for j = SpeciesList
             for k = IdxMatrix[State .== j]
                 
@@ -128,14 +132,27 @@ function MainRPS(μ, σ, ϵ, L, TotalIteration,PopulationRatio,WeightsList)
         rm("data", recursive=true)
         mkdir("data")
     end
+
     for i = 1:TotalIteration
         
+        print(i)
+        print(" ")
         State = Generation(L, State, Nμ, Nσ, Nϵ,NumSpe,WeightsList,SpeciesList,IdxMatrix)
-        writedlm("data\\" * string(i) * ".csv", State, ',', )
-        println(i)
+        FileName = "data\\" * string(i) * ".csv"
+        
+        print(typeof(State))
+        break
+        print(" ")
+        open(FileName, "w") do io
+            CSV.write(io, DataFrame(State, :auto))
+        end
+        # open(FileName, "w") do io
+        #     writedlm(io, State)
+        # end
+        println()
     end
 end
 
 
-MainRPS(1, 1, 3 * 10^-6, 100, 5000,[0.3,0.3,0.3],[0.1,1,1])
+MainRPS(1, 1, 3 * 10^-6, 512, 5000,[0.3,0.3,0.3],[0.1,1,1])
 
