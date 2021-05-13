@@ -1,7 +1,7 @@
 color = {'k','r','g','b'}
 colormap_rgb = [0 0 0;1 0 0; 0 1 0; 0 0 1];
 colormap(colormap_rgb)
-FolderName = 'data64_1.26_1/'
+FolderName = 'data64 - 1.0 - 1/'
 stepsize = 5
 
 while true
