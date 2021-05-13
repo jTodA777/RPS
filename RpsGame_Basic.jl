@@ -14,7 +14,7 @@ function InitMaker(L, PopulationRatio = [0.3, 0.3, 0.3])
     
     State = zeros(Int64, L, L)
     temp_idx = 1
-    for i = round.(Int, ceil.(length(State) * CumPopulationRatio)[end:-1:1])
+    @inbounds for i = round.(Int, ceil.(length(State) * CumPopulationRatio)[end:-1:1])
         State[1:i] .= temp_idx
         temp_idx += 1
     end
@@ -93,7 +93,7 @@ function Generation(L, State, Nμ, Nσ, Nϵ, NumSpe, WeightsList, SpeciesList, I
     # time2 = 0
     # time3 = 0
     # time = @elapsed 
-    for i = 1:L^2
+    @inbounds for i = 1:L^2
         # Loc = rand( IdxMatrix[State .== sample(SpeciesList, Weights(WeightsList))]) # 개체 수 무시 방법
         # println(State[IdxMatrix[1,1]])
         WeightsSpecies = sum([WeightsList[x] * (State .=== x) for x = SpeciesList])
@@ -135,7 +135,7 @@ function MainRPS(FolderName, μ, σ, ϵ, L, PreIteration, TotalIteration, Popula
         mkdir(FolderName)
     end
 
-    for i = 1:TotalIteration
+    @inbounds for i = 1:TotalIteration
         
         # print(WeightsList[1]," // ", i,"    //    ", "계산 중... ")
         
@@ -160,9 +160,9 @@ function MainRPS(FolderName, μ, σ, ϵ, L, PreIteration, TotalIteration, Popula
             
             # println(" 작성 완료")
         end
-        @printf("%.3f  //  %i \n", WeightsList[1], i)
+        @printf("%i // %.3f  //  %i \n", L,WeightsList[1], i)
         EmptySpaceN = count(State .=== Int8(0))
-        for j = SpeciesList
+        @inbounds for j = SpeciesList
             if count(State .=== j) + EmptySpaceN === L^2
                 EndFlag = true
                 break
@@ -173,16 +173,29 @@ function MainRPS(FolderName, μ, σ, ϵ, L, PreIteration, TotalIteration, Popula
         end
         
     end
+    return EndFlag
 end
 
-Threads.@threads for i = 1:0.1:3
-    for j = 1
-        FolderName = "data64_" * string(i) * "_" * string(j)
-        if ~isfile(FolderName * "/done")
-            Random.seed!(j)
-            MainRPS(FolderName, 1, 1, 3 * 10^-6, 64, 0, 10000, [0.3,0.3,0.3], [i,1,1])
-            io = open(FolderName * "/done", "w");
-            close(io);
+# Threads.@threads
+StepSize = 0.1
+@inbounds for j = 1:100
+    @inbounds for k = [64, 128, 256, 512, 1024]
+        @inbounds for i = [1:StepSize:3; (1 - StepSize):-StepSize:0.5]
+    
+        
+            FolderName = "data" * string(k) * " - " * string(i) * " - " * string(j)
+            if ~isfile(FolderName * "/done")
+                Random.seed!(j)
+                EndFlag = MainRPS(FolderName, 1, 1, 3 * 10^-6, k, 0, 10000, [0.3,0.3,0.3], [i,1,1])
+                io = open(FolderName * "/done", "w")
+                close(io)
+                if EndFlag == true
+                    io = open(FolderName * "/death", "w")
+                else
+                    io = open(FolderName * "/survived", "w")
+                end
+                close(io)
+            end
         end
     end
 end

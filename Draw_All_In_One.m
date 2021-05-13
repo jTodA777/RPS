@@ -1,4 +1,11 @@
 clearvars
+close all
+clc
+
+stepsize = 50
+
+
+
 color = {'k','r','g','b'}
 colormap_rgb = [0 0 0;1 0 0; 0 1 0; 0 0 1];
 colormap(colormap_rgb)
@@ -8,14 +15,14 @@ files = dir('.')
 dirFlags = [files.isdir]
 % Extract only those that are directories.
 subFolders = files(dirFlags)
-
-stepsize = 1
-
-while true
+% 
+% while true
     for k = 4:length(subFolders)
         
+        title_name = subFolders(k).name;
+        title_name(subFolders(k).name=='_')=' ';
         figure(k-3)
-        pause
+%         pause
         colormap(colormap_rgb)
         FolderName = [subFolders(k).name '/'];
         clf
@@ -49,10 +56,11 @@ while true
             
             subplot(2,2,[1,3])
             imagesc(A,[0 3])
+            sgtitle(title_name)
             title(num2str(i))
             %     pause(0.05)
             drawnow
             
         end
     end
-end
+% end
